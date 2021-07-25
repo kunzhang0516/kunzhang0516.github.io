@@ -27,9 +27,8 @@ var opacityCircles = 0.7,
 
 //Set the color for each region
 var color = d3.scale.ordinal()
-					.range(["#EFB605", "#E58903", "#E01A25", "#C20049", "#991C71", "#66489F", "#2074A0", "#10A66E", "#7EB852"])
-					.domain(["Africa | North & East", "Africa | South & West", "America | North & Central", "America | South", 
-							 "Asia | East & Central", "Asia | South & West", "Europe | North & West", "Europe | South & East", "Oceania"]);
+					.range(["#EFB605", "#E01A25", "#991C71", "#2074A0", "#7EB852"])
+					.domain(["Africa", "America", "Asia", "Europe",  "Oceania"]);
 							 
 //Set the new x axis range
 var xScale = d3.scale.log()
@@ -97,11 +96,13 @@ wrapper.append("g")
 	.text("Life expectancy");
 
 
+
 var countries = countries.filter(function(d) { return d.Continent == "Africa"});
 
 var averageLife = d3.mean(countries, d => d.lifeExpectancy);
+var averageGDP = d3.mean(countries, d => d.GDP_perCapita);
 console.log(averageLife);
-
+console.log(averageGDP);
 ////////////////////////////////////////////////////////////// 
 //////////////////// Set-up voronoi ////////////////////////// 
 ////////////////////////////////////////////////////////////// 
@@ -168,16 +169,36 @@ circleGroup.selectAll("countries")
 		.attr("cy", function(d) {return yScale(d.lifeExpectancy);})
 		.attr("r", function(d) {return rScale(d.GDP);})
 		.style("opacity", opacityCircles)
-		.style("fill", function(d) {return color(d.Region);});
+		.style("fill", function(d) {return color(d.Continent);});
 
-		
+
 circleGroup.append('line')
-    .style("stroke", "lightgreen")
-    .style("stroke-width", 10)
-    .attr("x1", 0)
-    .attr("y1", averageLife)
-    .attr("x2", 800)
-    .attr("y2", averageLife); 
+		.style("stroke", "lightgreen")
+		.style("stroke-width", 3)
+		.attr("x1", 0)
+		.attr("y1", yScale(averageLife))
+		.attr("x2", xScale(averageGDP))
+		.attr("y2", yScale(averageLife))
+
+circleGroup.append('line')
+		.style("stroke", "lightgreen")
+		.style("stroke-width", 3)
+		.attr("x1", xScale(averageGDP))
+		.attr("y1", yScale(averageLife))
+		.attr("x2", xScale(averageGDP))
+		.attr("y2", yScale(40))
+
+circleGroup.append("circle")
+		.attr("cx", xScale(averageGDP))
+		.attr("cy", yScale(averageLife))
+		.attr("r", 5)
+		.style("fill", "black");
+
+circleGroup.append('text')
+        .attr("y", yScale(averageLife) + 20)//magic number here
+        .attr("x", xScale(averageGDP) - 85)
+        .text("Average life:" + averageLife.toFixed(0) + "  , AverageGDP per capita:" + averageGDP.toFixed(0));
+
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////// Create the Legend////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
@@ -326,7 +347,7 @@ function selectLegend(opacity) {
 		var chosen = color.domain()[i];
 			
 		wrapper.selectAll(".countries")
-			.filter(function(d) { return d.Region != chosen; })
+			.filter(function(d) { return d.Continent != chosen; })
 			.transition()
 			.style("opacity", opacity);
 	  };

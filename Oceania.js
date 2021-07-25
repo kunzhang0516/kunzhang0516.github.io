@@ -97,7 +97,7 @@ wrapper.append("g")
 
 
 
-var countries = countries.filter(function(d) { return d.Continent == "Asia"});
+var countries = countries.filter(function(d) { return d.Continent == "Oceania"});
 
 var averageLife = d3.mean(countries, d => d.lifeExpectancy);
 var averageGDP = d3.mean(countries, d => d.GDP_perCapita);
