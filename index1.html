@@ -1,12 +1,74 @@
 <!DOCTYPE html>
 <html>
+<title>Scatterplot with Voronoi</title>
 <script src='https://d3js.org/d3.v5.min.js'></script>
-<style> circle {fill: lightblue; stroke: black;} </style>
+
 <body onload='init()'>
 <h1>Car Type MPG</h1>
 <p>This is to use interactive slide show 1</p>
 <a href="https://kunzhang0516.github.io/index" target="_blank">0</a>
 <a href="https://kunzhang0516.github.io/index1" target="_blank">1</a>
+
+  
+  <!-- Open Sans & CSS -->
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:700,400,300" rel='stylesheet' type='text/css'>
+	  <style>
+    circle {fill: lightblue; stroke: black;}
+
+		body {
+		  font-family: 'Open Sans', sans-serif;
+		  font-size: 12px;
+		  font-weight: 400;
+		  color: #525252;
+		  text-align: center;
+		}
+		
+		html, body { 
+			width:auto; 
+			height:auto; 
+		}
+		
+		.axis path,
+		.axis line {
+			fill: none;
+			stroke: #B3B3B3;
+			shape-rendering: crispEdges;
+		}
+		.axis text {
+			font-size: 10px;
+			fill: #6B6B6B;
+		}
+		
+		.popover {
+			pointer-events: none;
+		}
+
+		.legendTitle {
+			fill: #1A1A1A;
+			color: #1A1A1A;
+			text-anchor: middle;
+			font-size: 10px;
+		}
+
+		.legendText {
+			fill: #949494;
+			text-anchor: start;
+			font-size: 9px;
+		}
+		
+		@media (min-width: 500px) {
+		  .col-sm-3, .col-sm-9 {
+			float: left;
+		  }
+		  .col-sm-9 {
+			width: 75%;
+		  }
+		  .col-sm-3 {
+			width: 25%;
+		  }
+		}
+	  </style>
+
 <svg width=600 height=600>
 </svg>
 <script>
@@ -15,17 +77,45 @@ async function init() {
   ys = d3.scaleLog().base(10).domain([10,150]).range([400,0]);
   const data = await d3.csv(
     'https://flunky.github.io/cars2017.csv');
+  var wrapper = d3.select("svg").append("g").attr("class", "chordWrapper");
+
+  data2 = data.filter(function(d) { return d.Fuel == "Electricity"})
   d3.select('body')
     .select('svg')
     .append("g")
      .attr("transform", "translate(50,50)")
     .selectAll('circle')
-    .data(data)
+    .data(data2)
     .enter()
     .append('circle')
+     .attr("class", function(d,i) { return i; })
      .attr('cx',function(d) {return xs(d.AverageCityMPG);})
      .attr('cy',function(d) {return ys(d.AverageHighwayMPG);})
      .attr('r', function(d) {return 2+parseInt(d.EngineCylinders);});
+  
+  var voronoi = d3.geom.voronoi()
+    .x(function(d) { return xs(d.AverageCityMPG); })
+    .y(function(d) { return ys(d.AverageHighwayMPG); })
+    .clipExtent([[0, 0], [width, height]]);
+
+	
+//Create the voronoi grid
+d3.select("svg").selectAll("path")
+    .data(voronoi(data2)) //Use vononoi() with your dataset inside
+    .enter().append("path")
+    .attr("d", function(d, i) { return "M" + d.join("L") + "Z"; })
+    .datum(function(d, i) { return d.point; })
+    //Give each cell a unique class where the unique part corresponds
+    //to the circle classes
+    .attr("class", function(d,i) { return "voronoi " + i; })
+    //.style("stroke", "#2074A0") //If you want to look at the cells
+    .style("fill", "none")
+    .style("pointer-events", "all")
+    .on("mouseover", showTooltip)
+    .on("mouseout",  removeTooltip);
+
+
+
    d3.select("svg").append("g")
     .attr("transform", "translate(50,50)")
     .call(d3.axisLeft(ys).tickValues([10, 20, 50, 100])
@@ -48,6 +138,37 @@ async function init() {
     .attr("transform", "translate(50,450)")
     .call(d3.axisBottom(xs).tickValues([10, 20, 50, 100])
       .tickFormat(d3.format("~s")));
+
+    //Hide the tooltip when the mouse moves away
+function removeTooltip() {
+  //Fade out the circle to normal opacity
+  d3.select(this).style("opacity", opacityCircles);
+
+  //Hide tooltip
+  $('.popover').each(function() {
+    $(this).remove();
+}); 
+
+}//function removeTooltip
+
+//Show the tooltip on the hovered over slice
+function showTooltip(d) {
+//Define and show the tooltip
+  $(this).popover({
+    placement: 'auto top',
+    container: '#chart',
+    trigger: 'manual',
+    html : true,
+    content: function() { 
+      return "<span style='font-size: 11px; text-align: center;'>" + d.Country + "</span>"; }
+});
+$(this).popover('show');
+
+//Make chosen circle more visible
+d3.select(this).style("opacity", 1);
+        
+}//function showTooltip
+
       
 }
 </script>

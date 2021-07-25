@@ -13,7 +13,7 @@
 async function init() {
   xs = d3.scaleLog().base(10).domain([10,150]).range([0,400]);
   ys = d3.scaleLog().base(10).domain([10,150]).range([400,0]);
-  const data = await d3.csv(
+  var data = await d3.csv(
     'https://flunky.github.io/cars2017.csv');
   d3.select('body')
     .select('svg')
