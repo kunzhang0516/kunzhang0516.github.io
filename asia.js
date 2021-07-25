@@ -170,13 +170,20 @@ circleGroup.selectAll("countries")
 		.style("opacity", opacityCircles)
 		.style("fill", function(d) {return color(d.Region);});
 
+
 circleGroup.append('line')
 		.style("stroke", "lightgreen")
 		.style("stroke-width", 10)
 		.attr("x1", 0)
 		.attr("y1", yScale(averageLife))
 		.attr("x2", 800)
-		.attr("y2", yScale(averageLife)); 
+		.attr("y2", yScale(averageLife))
+
+circleGroup.append('text')
+        .attr("y", yScale(averageLife) + 10)//magic number here
+        .attr("x", 700)
+        .text("I'm a label");
+
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////// Create the Legend////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
