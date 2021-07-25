@@ -28,7 +28,7 @@ var opacityCircles = 0.7,
 //Set the color for each region
 var color = d3.scale.ordinal()
 					.range(["#EFB605", "#E01A25", "#991C71", "#2074A0", "#7EB852"])
-					.domain(["Africa", "America", "Asia", "Europe",  "Oceania"]);
+					.domain(["Africa", "Americas", "Asia", "Europe",  "Oceania"]);
 							 
 //Set the new x axis range
 var xScale = d3.scale.log()
